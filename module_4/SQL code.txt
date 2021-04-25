@@ -1,0 +1,59 @@
+SELECT 
+    f.flight_id, 
+    f.flight_no, 
+    f.scheduled_departure, 
+    f.scheduled_arrival, 
+    pp.city as departure_city,
+    pp.airport_name as airport_name_dep, 
+    pp.longitude as dep_longitude, 
+    pp.latitude as dep_latitude,
+    p.airport_code as arrival_airport, 
+    p.airport_name as airport_name_arr, 
+    p.city as arrival_city, 
+    p.longitude as arr_longitude, 
+    p.latitude as arr_latitude, 
+    p.timezone, 
+    f.status, 
+    f.actual_departure, 
+    f.actual_arrival, 
+    (f.actual_arrival-f.actual_departure) as actual_duration,
+    a.model, 
+    a.range, 
+    count(distinct s.seat_no) as seats, 
+    t.fare_conditions,
+    sum(t.amount) as total_amount,
+    min(t.amount) as min_amount,
+    avg(t.amount) as average_amount,
+    max(t.amount) as max_amount
+FROM dst_project.flights f
+    LEFT JOIN dst_project.aircrafts a ON f.aircraft_code=a.aircraft_code
+    LEFT JOIN dst_project.seats s ON f.aircraft_code=s.aircraft_code
+    LEFT JOIN dst_project.ticket_flights t ON f.flight_id=t.flight_id and s.fare_conditions=t.fare_conditions
+    LEFT JOIN dst_project.airports p ON f.arrival_airport=p.airport_code
+    LEFT JOIN dst_project.airports pp ON f.departure_airport=pp.airport_code
+WHERE departure_airport = 'AAQ'
+  AND (date_trunc('month', scheduled_departure) in ('2017-01-01','2017-02-01', '2017-12-01'))
+  AND status not in ('Cancelled')
+group by 
+    f.flight_id, 
+    f.flight_no, 
+    f.scheduled_departure, 
+    f.scheduled_arrival,
+    pp.city,
+    pp.airport_name, 
+    pp.longitude, 
+    pp.latitude,
+    p.airport_code, 
+    p.airport_name, 
+    p.city, 
+    p.longitude, 
+    p.latitude, 
+    p.timezone, 
+    f.status, 
+    f.actual_departure, 
+    f.actual_arrival, 
+    a.model, 
+    a.range, 
+    t.fare_conditions
+order by
+    f.flight_id
