@@ -12,13 +12,12 @@ SELECT
     p.city as arrival_city, 
     p.longitude as arr_longitude, 
     p.latitude as arr_latitude, 
-    p.timezone, 
-    f.status, 
+    p.timezone,  
     f.actual_departure, 
     f.actual_arrival, 
-    (f.actual_arrival-f.actual_departure) as actual_duration,
+    date_part('hour', f.actual_arrival - f.actual_departure) * 60 + 
+	date_part('minute', f.actual_arrival - f.actual_departure) as actual_duration,
     a.model, 
-    a.range, 
     count(distinct s.seat_no) as seats, 
     t.fare_conditions,
     sum(t.amount) as total_amount,
@@ -48,12 +47,10 @@ group by
     p.city, 
     p.longitude, 
     p.latitude, 
-    p.timezone, 
-    f.status, 
+    p.timezone,  
     f.actual_departure, 
     f.actual_arrival, 
-    a.model, 
-    a.range, 
+    a.model,  
     t.fare_conditions
 order by
     f.flight_id
